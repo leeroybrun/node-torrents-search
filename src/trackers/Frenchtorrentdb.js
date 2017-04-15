@@ -1,4 +1,4 @@
-import Tracker from '../Tracker';
+const Tracker = require('../tracker');
 
 class Frenchtorrentdb extends Tracker {
   constructor(options) {
@@ -10,11 +10,11 @@ class Frenchtorrentdb extends Tracker {
 
     this.baseUrl = 'http://www.frenchtorrentdb.net';
     this._endpoints = {
-      home:       this.baseUrl +'/index.php',
-      login:      this.baseUrl +'/account-login.php',
-      loginCheck: this.baseUrl +'/index.php',
-      search:     this.baseUrl +'/torrents-search.php',
-      download:   this.baseUrl +'/download.php'
+      home: this.baseUrl + '/index.php',
+      login: this.baseUrl + '/account-login.php',
+      loginCheck: this.baseUrl + '/index.php',
+      search: this.baseUrl + '/torrents-search.php',
+      download: this.baseUrl + '/download.php'
     };
 
     this._cats = {
@@ -42,7 +42,7 @@ class Frenchtorrentdb extends Tracker {
         'returnto': '/index.php'
       },
       headers: {
-        'Referer': this.baseUrl +'/account-login.php?returnto=%2Findex.php',
+        'Referer': this.baseUrl + '/account-login.php?returnto=%2Findex.php',
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Connection': 'keep-alive'
@@ -60,7 +60,7 @@ class Frenchtorrentdb extends Tracker {
         'lang': 0
       },
       headers: {
-        'Referer': this.baseUrl +'/?section=TORRENTS',
+        'Referer': this.baseUrl + '/?section=TORRENTS',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Connection': 'keep-alive'
       }

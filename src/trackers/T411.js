@@ -1,8 +1,8 @@
-import T411Client from 't411';
-import extend from 'extend';
+const T411Client = require('t411');
+const extend = require('extend');
 
-import Tracker from '../Tracker';
-import Torrent from '../torrent';
+const Tracker = require('../tracker');
+const Torrent = require('../torrent');
 
 class T411 extends Tracker {
   constructor(options) {
@@ -28,7 +28,7 @@ class T411 extends Tracker {
 
   isLogged() {
     // Check if already logged in less than 5 minutes ago
-    if(this._login.status && (Date.now() - this._login.lastLogin) < 300000) {
+    if (this._login.status && (Date.now() - this._login.lastLogin) < 300000) {
       return Promise.resolve(true);
     }
 
@@ -44,7 +44,7 @@ class T411 extends Tracker {
   login() {
     return new Promise((resolve, reject) => {
       this.client.auth(this._login.username, this._login.password, (err) => {
-        if(err) {
+        if (err) {
           return reject(err);
         }
 
@@ -64,13 +64,13 @@ class T411 extends Tracker {
     options = options || {};
     options.type = options.type || null;
 
-    if(this._cats[options.type]) {
+    if (this._cats[options.type]) {
       extend(options, this._cats[options.type]);
     }
 
     return new Promise((resolve, reject) => {
       this.client.search(text, options, (err, result) => {
-        if(err) {
+        if (err) {
           return reject(err);
         }
 
@@ -110,7 +110,7 @@ class T411 extends Tracker {
   download(torrent) {
     return new Promise((resolve, reject) => {
       this.client.download(torrent.data.id, (err, buf) => {
-        if(err) {
+        if (err) {
           return reject(err);
         }
 
