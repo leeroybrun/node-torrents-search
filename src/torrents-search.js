@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import events from 'events';
+const fs = require('fs');
+const path = require('path');
+const events = require('events');
 
-import defaultLogger from './logger';
+const defaultLogger = require('./logger');
 
 class TorrentsSearch extends events.EventEmitter {
   constructor(options) {
@@ -13,7 +13,7 @@ class TorrentsSearch extends events.EventEmitter {
     this.logger = options.logger || defaultLogger;
 
     this.options = {
-        timeout: options.timeout || 10000
+      timeout: options.timeout || 10000
     };
 
     this.trackers = []; // Array of loaded trackers
@@ -28,7 +28,7 @@ class TorrentsSearch extends events.EventEmitter {
     };
 
     this.trackers.forEach((tracker) => {
-      if(tracker.enabled === true) {
+      if (tracker.enabled === true) {
         trackers.enabled.push(tracker.name);
       } else {
         trackers.disabled.push(tracker.name);
@@ -41,7 +41,7 @@ class TorrentsSearch extends events.EventEmitter {
   loadTrackers() {
     return new Promise((resolve, reject) => {
       fs.readdir(this.trackersDir, (err, files) => {
-        if(err) {
+        if (err) {
           this.logger.error('Cannot load trackers from filesystem.', err);
           return reject(err);
         }
@@ -61,14 +61,14 @@ class TorrentsSearch extends events.EventEmitter {
   enableTracker(trackerName) {
     var tracker = this._findTracker(trackerName);
 
-    if(tracker !== null) {
+    if (tracker !== null) {
       tracker.enabled = true;
 
       this.emit('tracker:enabled', tracker);
 
       return true;
     } else {
-      this.logger.error('['+trackerName+'] Cannot enable. Tracker not found.');
+      this.logger.error('[' + trackerName + '] Cannot enable. Tracker not found.');
       return false;
     }
   }
@@ -76,25 +76,25 @@ class TorrentsSearch extends events.EventEmitter {
   disableTracker(trackerName) {
     var tracker = this._findTracker(trackerName);
 
-    if(tracker !== null) {
+    if (tracker !== null) {
       tracker.enabled = false;
 
       this.emit('tracker:disabled', tracker);
 
       return true;
     } else {
-      this.logger.error('['+trackerName+'] Cannot disable. Tracker not found.');
+      this.logger.error('[' + trackerName + '] Cannot disable. Tracker not found.');
       return false;
     }
   }
 
   setCredentials(trackerName, username, password) {
     var tracker = this._findTracker(trackerName);
-    if(tracker !== null) {
+    if (tracker !== null) {
       tracker.setCredentials(username, password);
       return true;
     } else {
-      this.logger.error('['+trackerName+'] Cannot set credentials. Tracker not found.');
+      this.logger.error('[' + trackerName + '] Cannot set credentials. Tracker not found.');
       return false;
     }
   }
@@ -105,22 +105,22 @@ class TorrentsSearch extends events.EventEmitter {
     const loggedInTrackers = [];
 
     this.trackers.forEach((tracker) => {
-      if(tracker.enabled === false) {
+      if (tracker.enabled === false) {
         return;
       }
 
       promises.push(new Promise((resolve) => {
-        this.logger.info('['+tracker.name+'] Start login...');
+        this.logger.info('[' + tracker.name + '] Start login...');
         tracker.login().then(() => {
-          this.logger.info('['+tracker.name+'] Logged in !');
+          this.logger.info('[' + tracker.name + '] Logged in !');
 
           loggedInTrackers.push(tracker);
 
           this.emit('tracker:loginSuccess', tracker);
 
           return resolve();
-        }).catch((reason) => {
-          this.logger.error('['+tracker.name+'] Error during login process.', reason);
+        }).catch((reason) => {
+          this.logger.error('[' + tracker.name + '] Error during login process.', reason);
 
           this.emit('tracker:loginError', tracker);
 
@@ -142,14 +142,14 @@ class TorrentsSearch extends events.EventEmitter {
 
       this.login().then((loggedInTrackers) => {
         loggedInTrackers.forEach((tracker) => {
-          this.logger.info('['+tracker.name+'] Starting search for "'+ searchText +'"...');
+          this.logger.info('[' + tracker.name + '] Starting search for "' + searchText + '"...');
 
           promises.push(new Promise((resolve) => {
             tracker.search(searchText, type).then((torrents) => {
-              if(torrents.length === 0) {
-                this.logger.info('['+tracker.name+'] No torrent found for "'+ searchText +'".');
+              if (torrents.length === 0) {
+                this.logger.info('[' + tracker.name + '] No torrent found for "' + searchText + '".');
               } else {
-                this.logger.info('['+tracker.name+'] '+ torrents.length +' torrent(s) found for "'+ searchText +'".');
+                this.logger.info('[' + tracker.name + '] ' + torrents.length + ' torrent(s) found for "' + searchText + '".');
 
                 torrentsFound = torrentsFound.concat(torrents);
 
@@ -158,7 +158,7 @@ class TorrentsSearch extends events.EventEmitter {
 
               return resolve();
             }).catch((reason) => {
-              this.logger.error('['+tracker.name+'] Error during search', reason);
+              this.logger.error('[' + tracker.name + '] Error during search', reason);
 
               this.emit('tracker:torrentsSearchError', reason, tracker);
 
@@ -177,15 +177,15 @@ class TorrentsSearch extends events.EventEmitter {
   download(torrent) {
     var tracker = this._findTracker(torrent.tracker);
 
-    if(tracker !== null) {
-      if(tracker.enabled) {
+    if (tracker !== null) {
+      if (tracker.enabled) {
         return tracker.download(torrent);
       } else {
-        this.logger.error('['+tracker.name+'] Cannot download torrent. Tracker not enabled.');
+        this.logger.error('[' + tracker.name + '] Cannot download torrent. Tracker not enabled.');
         return Promise.reject(new Error('Tracker not enabled.'));
       }
     } else {
-      this.logger.error('['+tracker.name+'] Cannot download torrent. Tracker not found.');
+      this.logger.error('[' + tracker.name + '] Cannot download torrent. Tracker not found.');
       return Promise.reject(new Error('Tracker not found.'));
     }
   }
@@ -193,8 +193,8 @@ class TorrentsSearch extends events.EventEmitter {
   _findTracker(trackerName) {
     var tracker = null;
 
-    this.trackers.forEach(function(t) {
-      if(t.name === trackerName) {
+    this.trackers.forEach(function (t) {
+      if (t.name === trackerName) {
         tracker = t;
       }
     });

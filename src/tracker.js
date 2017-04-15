@@ -1,9 +1,9 @@
-import request from 'request';
-import cheerio from 'cheerio';
-import extend from 'extend';
-import XRegExp from 'xregexp';
+const request = require('request');
+const cheerio = require('cheerio');
+const extend = require('extend');
+const XRegExp = require('xregexp');
 
-import Torrent from './torrent';
+const Torrent = require('./torrent');
 
 // Tracker class
 class Tracker {
@@ -22,11 +22,11 @@ class Tracker {
     this.loginRequired = false;
 
     this._endpoints = {
-      'home':       '',
-      'login':      '',
+      'home': '',
+      'login': '',
       'loginCheck': '',
-      'search':     '',
-      'download':   ''
+      'search': '',
+      'download': ''
     };
 
     this._cats = {
@@ -63,7 +63,7 @@ class Tracker {
    */
   isLogged() {
     // Check if already logged in less than 5 minutes ago
-    if(!this.loginRequired || (this._login.status && (Date.now() - this._login.lastLogin) < 300000)) {
+    if (!this.loginRequired || (this._login.status && (Date.now() - this._login.lastLogin) < 300000)) {
       return Promise.resolve(true);
     }
 
@@ -71,7 +71,7 @@ class Tracker {
     this._login.status = false;
 
     return this._request({ url: this._endpoints.loginCheck, method: 'GET' }).then((body) => {
-      if(!this._checkLoginSuccess(body)) {
+      if (!this._checkLoginSuccess(body)) {
         return Promise.resolve(false);
       }
 
@@ -88,7 +88,7 @@ class Tracker {
   login() {
     return new Promise((resolve, reject) => {
       this.isLogged().then((status) => {
-        if(status === true) {
+        if (status === true) {
           return resolve(); // This way we stop the waterfall, we are already logged in
         }
 
@@ -100,14 +100,14 @@ class Tracker {
             headers: data.headers
           });
         }).then((body) => {
-          if(!this._endpoints.loginCheck) {
+          if (!this._endpoints.loginCheck) {
             return Promise.resolve(body);
           }
 
           return this._request({ url: this._endpoints.loginCheck, method: 'GET' });
         }).then((body) => {
           // Login successful
-          if(this._checkLoginSuccess(body) === false) {
+          if (this._checkLoginSuccess(body) === false) {
             return reject(new Error('An error occured during the login process.'));
           }
 
@@ -138,7 +138,7 @@ class Tracker {
         return this._getSearchData(text, options);
       })
       .then((data) => {
-        if(this._cats[options.type]) {
+        if (this._cats[options.type]) {
           data.fields = extend(data.fields, this._cats[options.type]);
         }
 
@@ -162,47 +162,47 @@ class Tracker {
     // Field just a selector string
     if (typeof field === 'string') {
       selector = field;
-    // Field is an array of ['selector', 'attribute', 'regexp']
+      // Field is an array of ['selector', 'attribute', 'regexp']
     } else if (Array.isArray(field)) {
-      selector    = field[0];
-      attr        = (field[1]) ? field[1] : null;
-      regex       = (field[2]) ? field[2] : null;
-    // Field is an object of type {selector: 'selector', attr: 'attribute', re: 'regexp']
+      selector = field[0];
+      attr = (field[1]) ? field[1] : null;
+      regex = (field[2]) ? field[2] : null;
+      // Field is an object of type {selector: 'selector', attr: 'attribute', re: 'regexp']
     } else if (typeof field === 'object') {
-      selector    = field.selector;
-      attr        = (field.attr) ? field.attr : null;
-      regex       = (field.regex) ? field.regex : null;
+      selector = field.selector;
+      attr = (field.attr) ? field.attr : null;
+      regex = (field.regex) ? field.regex : null;
     }
 
-    if(!selector) {
+    if (!selector) {
       return null;
     }
 
     let $fieldElm = $elm.find(selector);
 
-    if($fieldElm.length === 0) {
+    if ($fieldElm.length === 0) {
       return null;
     }
 
     $fieldElm = $fieldElm.eq(0);
 
-    if(!$fieldElm) {
+    if (!$fieldElm) {
       return null;
     }
 
     let value = null;
-    if(attr !== null) {
-      if($fieldElm.attr(attr)) {
+    if (attr !== null) {
+      if ($fieldElm.attr(attr)) {
         value = $fieldElm.attr(attr).trim();
       }
     } else {
       value = $fieldElm.text().trim();
     }
 
-    if(regex !== null) {
+    if (regex !== null) {
       regex = XRegExp(regex, 'ig');
       let matches = XRegExp.exec(value, regex);
-      if(matches !== null && fieldName in matches && matches[fieldName]) {
+      if (matches !== null && fieldName in matches && matches[fieldName]) {
         value = matches[fieldName].trim();
       }
     }
@@ -219,38 +219,38 @@ class Tracker {
       case 'B':
       case 'BYTES':
       case 'O':
-          newSize = (parseFloat(sizeA[0]) / 1000 / 1000).toFixed(2);
-          break;
+        newSize = (parseFloat(sizeA[0]) / 1000 / 1000).toFixed(2);
+        break;
       case 'KB':
       case 'KO':
-          newSize = (parseFloat(sizeA[0]) / 1000).toFixed(2);
-          break;
+        newSize = (parseFloat(sizeA[0]) / 1000).toFixed(2);
+        break;
       case 'MB':
       case 'MO':
-          newSize = (parseFloat(sizeA[0])).toFixed(2);
-          break;
+        newSize = (parseFloat(sizeA[0])).toFixed(2);
+        break;
       case 'GB':
       case 'GO':
-          newSize = (parseFloat(sizeA[0]) * 1000).toFixed(2);
-          break;
+        newSize = (parseFloat(sizeA[0]) * 1000).toFixed(2);
+        break;
       case 'TB':
       case 'TO':
-          newSize = (parseFloat(sizeA[0]) * 1000 * 1000).toFixed(2);
-          break;
+        newSize = (parseFloat(sizeA[0]) * 1000 * 1000).toFixed(2);
+        break;
       case 'KIB':
-          newSize = ((parseFloat(sizeA[0]) * 1024) / 1000 / 1000).toFixed(2);
-          break;
+        newSize = ((parseFloat(sizeA[0]) * 1024) / 1000 / 1000).toFixed(2);
+        break;
       case 'MIB':
-          newSize = ((parseFloat(sizeA[0]) * 1024 * 1024) / 1000 / 1000).toFixed(2);
-          break;
+        newSize = ((parseFloat(sizeA[0]) * 1024 * 1024) / 1000 / 1000).toFixed(2);
+        break;
       case 'GIB':
-          newSize = ((parseFloat(sizeA[0]) * 1024 * 1024 * 1024) / 1000 / 1000).toFixed(2);
-          break;
+        newSize = ((parseFloat(sizeA[0]) * 1024 * 1024 * 1024) / 1000 / 1000).toFixed(2);
+        break;
       case 'TIB':
-          newSize = ((parseFloat(sizeA[0]) * 1024 * 1024 * 1024 * 1024) / 1000 / 1000).toFixed(2);
-          break;
+        newSize = ((parseFloat(sizeA[0]) * 1024 * 1024 * 1024 * 1024) / 1000 / 1000).toFixed(2);
+        break;
       default:
-          return size;
+        return size;
     }
 
     return newSize;
@@ -258,7 +258,7 @@ class Tracker {
 
   _getAbsoluteUrl(url) {
     var r = new RegExp('^(?:[a-z]+:)?//', 'i');
-    if(r.test(url) === false) {
+    if (r.test(url) === false) {
       url = this.baseUrl + ((url.indexOf('/') !== 0) ? '/' : '') + url;
     }
 
@@ -286,7 +286,7 @@ class Tracker {
 
           const fields = {};
 
-          for(let key in parseData.fields) {
+          for (let key in parseData.fields) {
             fields[key] = this._getFieldData($torrentEl, key, parseData.fields[key]);
           }
 
@@ -304,7 +304,7 @@ class Tracker {
           });
 
           // Parse custom fields
-          for(let key in parseData.data) {
+          for (let key in parseData.data) {
             torrent.data[key] = this._getFieldData($torrentEl, key, parseData.data[key]);
           }
 
@@ -343,7 +343,7 @@ class Tracker {
    */
   _request(options) {
     // Headers not set in the options, create empty object
-    if(!('headers' in options) || typeof options.headers !== 'object') {
+    if (!('headers' in options) || typeof options.headers !== 'object') {
       options.headers = {};
     }
 
@@ -353,10 +353,10 @@ class Tracker {
     options.timeout = this.options.timeout; // We add a timeout to the request, for slow trackers to not block others
 
     // We define the right request params regarding the method used
-    if('params' in options) {
+    if ('params' in options) {
       if (options.method === 'GET') {
         options.qs = options.params;
-      } else  {
+      } else {
         options.form = options.params;
       }
 
@@ -366,10 +366,10 @@ class Tracker {
     return new Promise((resolve, reject) => {
       // Send the request
       request(options, (error, response, body) => {
-        if(error) {
+        if (error) {
           return reject(error);
-        } else if(response.statusCode !== 200) {
-          return reject(new Error('Response status code : '+ response.statusCode));
+        } else if (response.statusCode !== 200) {
+          return reject(new Error('Response status code : ' + response.statusCode));
         }
 
         return resolve(body);
@@ -380,7 +380,7 @@ class Tracker {
   /**
    *  Check for string/element inside the provided body to check for login success/failure
    */
-  _checkLoginSuccess(body) {
+  _checkLoginSuccess() {
     /*jshint unused:false*/
     return true;
   }
@@ -405,8 +405,8 @@ class Tracker {
    *  Returns the fields & headers to send to the tracker for search
    *  Needs to be overridden with each tracker's specific fields
    */
-  _getSearchData(query, options) {
-    /*jshint unused:false*/
+  _getSearchData() {
+
     return Promise.resolve({
       'method': '', // POST, GET
       'fields': {
@@ -446,7 +446,7 @@ class Tracker {
    *  Returns the fields & headers to send to the tracker for download
    *  Needs to be overridden with each tracker's specific fields
    */
-  _getDownloadData(torrent) {
+  _getDownloadData() {
     /*jshint unused:false*/
     return Promise.resolve({
       'method': '', // POST, GET

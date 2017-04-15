@@ -1,4 +1,4 @@
-import Tracker from '../Tracker';
+const Tracker = require('../tracker');
 
 const urlify = require('urlify').create({
   spaces: '-',
@@ -15,31 +15,31 @@ class Cpasbien extends Tracker {
 
     this.baseUrl = 'http://www.cpasbien.cm';
     this._endpoints = {
-      home:       this.baseUrl +'/',
-      search:     this.baseUrl +'/recherche',
-      download:   this.baseUrl +'/telechargement'
+      home: this.baseUrl + '/',
+      search: this.baseUrl + '/recherche',
+      download: this.baseUrl + '/telechargement'
     };
   }
 
   _getSearchData(query, options) {
-    let url = this._endpoints.search +'/';
+    let url = this._endpoints.search + '/';
 
-    if('type' in options) {
-      if(options.type === 'movie') {
+    if ('type' in options) {
+      if (options.type === 'movie') {
         url += 'films/';
-      } else if(options.type === 'tvshow') {
+      } else if (options.type === 'tvshow') {
         url += 'series/';
       }
     }
 
-    url += urlify(query) +'.html,trie-seeds-d';
+    url += urlify(query) + '.html,trie-seeds-d';
 
     return Promise.resolve({
       method: 'GET',
       url: url,
       fields: {},
       headers: {
-        'Referer': this.baseUrl +'/',
+        'Referer': this.baseUrl + '/',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Connection': 'keep-alive'
       }
@@ -64,10 +64,10 @@ class Cpasbien extends Tracker {
   _getDownloadData(torrent) {
     return Promise.resolve({
       method: 'GET',
-      url: this._endpoints.download +'/'+ urlify(torrent.name) +'.torrent',
+      url: this._endpoints.download + '/' + urlify(torrent.name) + '.torrent',
       fields: {},
       headers: {
-        'Referer': this.baseUrl +'/',
+        'Referer': this.baseUrl + '/',
       }
     });
   }
